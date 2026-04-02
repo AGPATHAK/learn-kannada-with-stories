@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Sparkles, Loader2, Play, GraduationCap, Info, Plus, Trash2, Library, History } from 'lucide-react';
 import { Story, generateStory } from './lib/gemini';
-import { getStories, saveStory, deleteStory } from './lib/storage';
+import { getStories, saveStory, deleteStory, clearStories } from './lib/storage';
 import StoryPlayer from './components/StoryPlayer';
 import VocabularyView from './components/VocabularyView';
 
@@ -66,16 +66,22 @@ export default function App() {
     } catch (error) {
       console.error("Failed to create story:", error);
       setState('library');
-      alert("Failed to create story. Please try again.");
+      // In a real app, we'd show a toast or error message in the UI
     }
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (confirm("Delete this story from your library?")) {
-      await deleteStory(id);
-      await loadLibrary();
-    }
+    // confirm() often fails in iframes, so we'll delete directly for now 
+    // or we could implement a custom modal later.
+    await deleteStory(id);
+    await loadLibrary();
+  };
+
+  const handleClearAll = async () => {
+    if (library.length === 0) return;
+    await clearStories();
+    await loadLibrary();
   };
 
   const selectStory = (story: Story) => {
@@ -124,9 +130,20 @@ export default function App() {
               className="max-w-5xl mx-auto w-full p-6 py-8"
             >
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                <div>
+                <div className="flex flex-col gap-2">
                   <h2 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">Your Story Library</h2>
-                  <p className="text-slate-500">Choose a story to start learning or add a new one.</p>
+                  <div className="flex items-center gap-4">
+                    <p className="text-slate-500">Choose a story to start learning or add a new one.</p>
+                    {library.length > 0 && (
+                      <button 
+                        onClick={handleClearAll}
+                        className="text-xs font-bold text-red-400 hover:text-red-600 transition-colors flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Clear All
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex gap-2 w-full md:w-auto">

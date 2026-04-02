@@ -146,16 +146,13 @@ async function generateSpeechBase64(text: string): Promise<string> {
   view.setUint32(40, len, true);
 
   // Convert to base64 for storage
-  const combined = new Uint8Array(44 + len);
-  combined.set(new Uint8Array(wavHeader), 0);
-  combined.set(bytes, 44);
-  
-  let binary = '';
-  const chunkLen = 8192;
-  for (let i = 0; i < combined.length; i += chunkLen) {
-    binary += String.fromCharCode.apply(null, Array.from(combined.slice(i, i + chunkLen)));
-  }
-  return `data:audio/wav;base64,${btoa(binary)}`;
+  const blob = new Blob([wavHeader, bytes], { type: 'audio/wav' });
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 export async function generateSpeech(text: string): Promise<string> {

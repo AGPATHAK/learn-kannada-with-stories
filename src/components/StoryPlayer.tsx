@@ -83,7 +83,6 @@ export default function StoryPlayer({ story, onComplete }: StoryPlayerProps) {
   const handleNext = () => {
     if (currentSegmentIndex < story.segments.length - 1) {
       setCurrentSegmentIndex(prev => prev + 1);
-      setAudioUrl(null);
       setIsPlaying(true);
     } else {
       setIsPlaying(false);
@@ -94,7 +93,6 @@ export default function StoryPlayer({ story, onComplete }: StoryPlayerProps) {
   const handlePrev = () => {
     if (currentSegmentIndex > 0) {
       setCurrentSegmentIndex(prev => prev - 1);
-      setAudioUrl(null);
       setIsPlaying(true);
     }
   };
@@ -217,17 +215,15 @@ export default function StoryPlayer({ story, onComplete }: StoryPlayerProps) {
         </div>
       </div>
 
-      {audioUrl && (
-        <audio
-          ref={audioRef}
-          src={audioUrl}
-          onEnded={onAudioEnded}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          autoPlay={isPlaying}
-          hidden
-        />
-      )}
+      <audio
+        ref={audioRef}
+        src={audioUrl || ''}
+        onEnded={onAudioEnded}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        autoPlay={isPlaying}
+        hidden
+      />
     </div>
   );
 }
