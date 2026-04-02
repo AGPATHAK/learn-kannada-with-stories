@@ -23,8 +23,29 @@ export interface Story {
   createdAt: number;
 }
 
-export async function generateStory(topic: string): Promise<Story> {
-  const response = await ai.models.generateContent({
+async function callWithRetry<T>(fn: () => Promise<T>, maxRetries = 3, initialDelay = 2000): Promise<T> {
+  let lastError: any;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const isRateLimit = error?.message?.includes('429') || error?.status === 'RESOURCE_EXHAUSTED' || (typeof error === 'string' && error.includes('429'));
+      
+      if (isRateLimit && i < maxRetries - 1) {
+        const delay = initialDelay * Math.pow(2, i);
+        console.warn(`Rate limit hit. Retrying in ${delay}ms... (Attempt ${i + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+}
+
+export async function generateStory(topic: string, onProgress?: (current: number, total: number) => void): Promise<Story> {
+  const response = await callWithRetry(() => ai.models.generateContent({
     model: "gemini-3.1-pro-preview",
     contents: `Generate a short children's story in Kannada for language learners about "${topic}". 
     The story should be simple. 
@@ -65,7 +86,7 @@ export async function generateStory(topic: string): Promise<Story> {
         required: ["title", "segments", "vocabulary"]
       }
     }
-  });
+  }));
 
   const storyData = JSON.parse(response.text || "{}");
   const story: Story = {
@@ -75,7 +96,10 @@ export async function generateStory(topic: string): Promise<Story> {
   };
 
   // Generate audio for each segment upfront
-  for (const segment of story.segments) {
+  const total = story.segments.length;
+  for (let i = 0; i < total; i++) {
+    const segment = story.segments[i];
+    if (onProgress) onProgress(i + 1, total);
     try {
       segment.audioData = await generateSpeechBase64(segment.kannada);
     } catch (e) {
@@ -87,7 +111,7 @@ export async function generateStory(topic: string): Promise<Story> {
 }
 
 async function generateSpeechBase64(text: string): Promise<string> {
-  const response = await ai.models.generateContent({
+  const response = await callWithRetry(() => ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
     contents: [{ parts: [{ text: text.trim() }] }],
     config: {
@@ -98,7 +122,7 @@ async function generateSpeechBase64(text: string): Promise<string> {
         },
       },
     },
-  });
+  }));
 
   const part = response.candidates?.[0]?.content?.parts?.[0];
   const base64Audio = part?.inlineData?.data;

@@ -20,7 +20,7 @@ export default function App() {
   const [library, setLibrary] = useState<Story[]>([]);
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
   const [loadingMessage, setLoadingMessage] = useState('Preparing your story...');
-  const [isSeeding, setIsSeeding] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     loadLibrary();
@@ -29,44 +29,33 @@ export default function App() {
   const loadLibrary = async () => {
     const stories = await getStories();
     setLibrary(stories.sort((a, b) => b.createdAt - a.createdAt));
-    
-    // If empty, offer to seed or show empty state
-    if (stories.length === 0 && !isSeeding) {
-      // We could auto-seed here if we want
-    }
-  };
-
-  const seedLibrary = async () => {
-    setIsSeeding(true);
-    setState('loading');
-    for (const topic of SEED_TOPICS) {
-      setLoadingMessage(`Seeding: "${topic}"...`);
-      try {
-        const story = await generateStory(topic);
-        await saveStory(story);
-      } catch (e) {
-        console.error("Failed to seed topic:", topic, e);
-      }
-    }
-    await loadLibrary();
-    setIsSeeding(false);
-    setState('library');
   };
 
   const addNewStory = async (topic: string) => {
     setState('loading');
-    setLoadingMessage(`Creating "${topic}"... This may take a minute as we generate audio for all parts.`);
+    setLoadingMessage(`Creating "${topic}"...`);
+    setLoadingProgress({ current: 0, total: 0 });
+    
     try {
-      const story = await generateStory(topic);
+      const story = await generateStory(topic, (current, total) => {
+        setLoadingProgress({ current, total });
+        setLoadingMessage(`Generating audio for part ${current} of ${total}...`);
+      });
       story.isCustom = true;
       await saveStory(story);
       await loadLibrary();
       setCurrentStory(story);
       setState('playing');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create story:", error);
-      setState('library');
-      // In a real app, we'd show a toast or error message in the UI
+      const isRateLimit = error?.message?.includes('429') || error?.status === 'RESOURCE_EXHAUSTED' || (typeof error === 'string' && error.includes('429'));
+      
+      if (isRateLimit) {
+        setLoadingMessage("Rate limit reached. Please wait a minute before trying again.");
+        setTimeout(() => setState('library'), 3000);
+      } else {
+        setState('library');
+      }
     }
   };
 
@@ -175,14 +164,24 @@ export default function App() {
                   </div>
                   <h3 className="text-2xl font-bold text-slate-800 mb-4">Your library is empty</h3>
                   <p className="text-slate-500 mb-8 max-w-md mx-auto">
-                    Start by seeding the library with classic stories or create your own custom story above.
+                    Start by adding one of these classic stories or create your own custom story above.
                   </p>
-                  <button 
-                    onClick={seedLibrary}
-                    className="px-8 py-4 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 transition-all shadow-lg shadow-brand-100"
-                  >
-                    Seed Library with 4 Stories
-                  </button>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                    {SEED_TOPICS.map((topic) => (
+                      <button 
+                        key={topic}
+                        onClick={() => addNewStory(topic)}
+                        className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl font-bold text-slate-700 hover:border-brand-500 hover:text-brand-600 hover:bg-brand-50 transition-all group"
+                      >
+                        <span className="flex items-center gap-3">
+                          <Sparkles className="w-4 h-4 text-brand-400 group-hover:text-brand-600" />
+                          {topic}
+                        </span>
+                        <Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -239,7 +238,16 @@ export default function App() {
                 </div>
               </div>
               <h3 className="mt-8 text-2xl font-bold text-slate-800 max-w-md">{loadingMessage}</h3>
-              <p className="mt-2 text-slate-400">This ensures smooth playback without any delays later.</p>
+              {loadingProgress.total > 0 && (
+                <div className="mt-6 w-full max-w-xs bg-slate-200 h-2 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="bg-brand-600 h-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(loadingProgress.current / loadingProgress.total) * 100}%` }}
+                  />
+                </div>
+              )}
+              <p className="mt-4 text-slate-400">This ensures smooth playback without any delays later.</p>
             </motion.div>
           )}
 
