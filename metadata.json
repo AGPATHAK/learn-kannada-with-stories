@@ -1,5 +1,4 @@
 {
   "name": "Kannada Kali",
-  "description": "An interactive Kannada language learning app featuring narrated stories, script highlighting, and vocabulary building.",
-  "requestFramePermissions": ["microphone"]
+  "description": "A curated Kannada learning app built around familiar stories, timed text highlighting, and end-of-story vocabulary review."
 }
