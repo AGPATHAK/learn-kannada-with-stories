@@ -1,20 +1,39 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Learn Kannada With Stories
 
-# Run and deploy your AI Studio app
+`learn-kannada-with-stories` is a curated reading app for Kannada learners. Instead of generating stories live, it presents familiar stories as polished mini-lessons with:
 
-This contains everything you need to run your app locally.
+- a story library built from well-known tales
+- timed Kannada text highlighting during playback
+- English support text for comprehension
+- a short vocabulary review after each lesson
 
-View your app in AI Studio: https://ai.studio/apps/1cbf8dfe-8044-45c2-b1d7-62d84174ad5a
+## Product Direction
+
+This repo is now structured for pre-authored content rather than live AI generation. Story content lives in code and can later be moved into JSON manifests plus audio assets.
+
+The intended workflow is:
+
+1. Curate a story
+2. Author Kannada lines and English support text
+3. Add word timings
+4. Attach narration audio when ready
+5. Review vocabulary at the end
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+Prerequisite: Node.js
 
+1. Install dependencies with `npm install`
+2. Start the dev server with `npm run dev`
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Current Content Model
+
+Each story contains:
+
+- story metadata
+- segments
+- timed tokens per segment
+- optional `audioSrc` for real narration files
+- vocabulary items with meaning and pronunciation
+
+If audio is not attached yet, the player falls back to a built-in timed reading preview so the UI can still be tested.
