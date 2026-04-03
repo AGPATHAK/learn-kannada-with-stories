@@ -2,9 +2,9 @@
 
 ## Purpose
 
-`learn-kannada-with-stories` is evolving into a curated Kannada learning app built around familiar stories, timed reading support, and lightweight vocabulary review. The immediate goal is to turn the current prototype into a repeatable lesson platform that can support a growing content library and real narration.
+`learn-kannada-with-stories` is a curated Kannada reading app for beginners. The product direction is not live story generation. The product direction is a small, carefully-authored lesson library built around familiar stories, guided reading support, comprehension checks, and vocabulary that can later feed a broader Kannada learning system.
 
-This roadmap is based on the current repository state and the product direction already documented in the codebase.
+This roadmap is based on the current repository state and adjusted to reflect the most important execution risks: narration sourcing, content schema timing, beginner pronunciation scaffolding, and integration with the broader learning loop.
 
 ## Current State
 
@@ -13,187 +13,238 @@ The project already includes:
 - a story library UI with two beginner stories
 - a lesson player with timed token highlighting
 - a fallback preview mode when narration audio is missing
-- a vocabulary review screen at the end of each lesson
+- an end-of-story vocabulary review screen
 - local completion tracking in the browser
-- a clean TypeScript and Vite codebase structured around curated content
+- a clean TypeScript and Vite codebase for curated lesson content
 
 The main gaps are:
 
-- no real narration assets wired into lessons yet
-- content still authored directly in TypeScript rather than a scalable content pipeline
+- no explicit narration strategy
+- story content still authored directly in TypeScript
+- no Devanagari pronunciation scaffold in the lesson data model
+- no comprehension questions in the lesson flow
+- no inline word help while reading
+- no bridge from story vocabulary into the existing spaced-repetition ecosystem
 - no testing coverage for lesson playback, progress, or content integrity
-- no learner accounts, syncing, analytics, or spaced repetition features
-- no clear editorial workflow for adding stories consistently
 
 ## Product Goals
 
-### Goal 1: Deliver a polished beginner learning experience
+### Goal 1: Deliver a strong beginner reading experience
 
-Make the current reading flow feel dependable, understandable, and rewarding for first-time Kannada learners.
+Make each lesson readable, understandable, and useful for a learner who cannot yet read Kannada confidently without support.
 
-### Goal 2: Build a scalable content system
+### Goal 2: Build a content system that scales
 
-Reduce the cost of adding new stories by introducing a repeatable authoring, review, and publishing workflow.
+Reduce the cost of adding and reviewing stories by moving early to a schema-driven lesson format.
 
-### Goal 3: Prepare the app for richer learning features
+### Goal 3: Connect stories to long-term retention
 
-Lay the foundation for narration quality, learner progress, revision loops, and future personalization.
+Use story reading as an input into comprehension practice, vocabulary review, and spaced repetition.
+
+## Guiding Decisions
+
+### Narration strategy
+
+The default near-term narration path should be AI-generated Kannada speech, with human narration as an optional quality upgrade later.
+
+Reasoning:
+
+- it is the fastest way to make the existing stories fully narrated
+- it removes a major content production bottleneck for a solo developer
+- it keeps the roadmap from stalling on recording logistics
+
+This decision should be revisited only if high-quality human narration becomes easy to source. Until then, the roadmap assumes TTS-first narration, with alignment checks for segment audio and token timing.
+
+### Pronunciation scaffold
+
+Devanagari pronunciation support should be treated as a first-class beginner aid, consistent with the rest of the Kannada learning ecosystem. It should live in the lesson content model, not as an afterthought in UI copy.
+
+### Comprehension is a core feature
+
+This app is not just a read-along player. Every lesson should eventually include lightweight comprehension checks so “reading and comprehension” is reflected in the actual lesson loop.
 
 ## Phased Roadmap
 
-### Phase 1: Stabilize the Core Lesson Experience
+### Phase 1: Stabilize the Core Lesson Experience and Lock the Content Schema
 
-Target outcome: make the current prototype feel release-ready for a small alpha.
+Target outcome: make the current prototype dependable while preventing future content expansion from getting trapped in code-authored lessons.
 
 Workstreams:
 
-- add basic QA coverage for story data, token timing validity, and completion flow
 - improve playback controls and edge-case handling around pause, replay, and segment navigation
 - add clearer lesson states for narration loading, preview mode, and lesson completion
 - verify responsive behavior and readability across mobile and desktop
 - add lightweight error handling for missing or malformed story content
+- define a minimal external story schema before adding many more lessons
+- include fields for Kannada text, English support text, token timing, optional audio, Devanagari pronunciation scaffold, vocabulary items, and comprehension questions
+- add validation for token timing monotonicity, segment duration consistency, and required lesson fields
 
 Suggested deliverables:
 
 - alpha-ready lesson flow
-- smoke tests or type-level content validation
-- documented expectations for story segment timing and vocabulary entries
+- minimal JSON or manifest-based lesson schema
+- validation utilities for story data integrity
+- documented requirements for lesson fields and timing expectations
 
-### Phase 2: Introduce Real Audio and Content Standards
+### Phase 2: Add Narrated Lessons, Devanagari Support, Inline Glossing, and Comprehension
 
-Target outcome: turn the prototype into a true narrated lesson experience.
+Target outcome: turn the prototype into a real beginner lesson experience rather than a timing demo.
 
 Workstreams:
 
-- attach real audio files for the existing stories
-- define a naming convention for audio assets and per-segment narration
-- add validation to ensure `audioSrc`, token timings, and segment durations stay aligned
-- create a story authoring checklist covering Kannada text, English support text, timings, and vocabulary
-- refine the player so audio-backed lessons and preview-backed lessons behave consistently
+- implement the chosen narration pipeline using Kannada TTS as the default baseline
+- define an audio generation and storage convention for per-segment narration
+- ensure `audioSrc`, token timings, and segment durations stay aligned through validation
+- add Devanagari pronunciation support to vocabulary items and, where helpful, story tokens or segments
+- add tap-to-gloss or equivalent inline word help during reading
+- add 2 to 3 comprehension questions per story after the reading flow
+- create a story authoring checklist covering Kannada quality, English support text, pronunciation scaffold, narration, vocabulary, and comprehension
 
 Suggested deliverables:
 
 - two fully narrated launch stories
-- editorial checklist for new lessons
-- content validation utilities for story completeness
+- inline glossary support during reading
+- comprehension review at the end of each lesson
+- editorial checklist for lesson creation and QA
 
-### Phase 3: Expand the Story Library
+### Phase 3: Expand the Library with a Defined Corpus Strategy
 
-Target outcome: grow from a prototype into a small but credible beginner curriculum.
+Target outcome: grow into a small but coherent beginner curriculum instead of an arbitrary set of stories.
 
 Workstreams:
 
-- add 8 to 12 additional familiar stories across beginner and early reader levels
-- organize content by level, theme, or grammar focus
-- diversify vocabulary selection to cover verbs, connectors, adjectives, and everyday nouns
-- add metadata for difficulty, grammar focus, and lesson tags
-- create a release cadence for publishing and reviewing new stories
+- define what “familiar stories” means for this product
+- document a corpus rationale based on vocabulary frequency, grammar usefulness, sentence length, and learner accessibility
+- prioritize sources such as Panchatantra, Aesop, and other widely-recognized stories with simple narrative structure
+- add 8 to 12 additional lessons across beginner and early reader levels using the external schema
+- organize lessons by level, theme, or grammar focus
+- diversify vocabulary coverage across verbs, connectors, adjectives, and everyday nouns
 
 Suggested deliverables:
 
 - starter library of 10 to 14 polished lessons
+- written corpus selection criteria
 - visible progression path for beginners
-- content inventory with status tracking for draft, review, recorded, and published
+- content inventory with draft, review, narrated, and published states
 
-### Phase 4: Move to a Scalable Content Pipeline
+### Phase 4: Strengthen the Content Pipeline and Cross-App Vocabulary Flow
 
-Target outcome: make lesson creation easier without coupling every story to app code changes.
+Target outcome: make lesson creation sustainable and make story vocabulary reusable outside this app.
 
 Workstreams:
 
-- move story definitions from TypeScript modules into JSON or structured content manifests
-- build import or validation scripts for stories and audio metadata
-- separate editorial content from presentation logic
-- document the end-to-end content workflow from story selection to release
-- prepare for non-developer contribution to lesson authoring
+- build import and validation scripts for lesson manifests and audio metadata
+- separate editorial content from presentation logic completely
+- document the end-to-end workflow from story selection to publication
+- prepare for non-developer lesson contribution
+- design a vocabulary export format compatible with the existing word trainer or Leitner-style review system
+- support exporting newly introduced story words into a shared review deck format
 
 Suggested deliverables:
 
-- manifest-based content system
+- contributor-friendly manifest pipeline
 - content linting or validation script
-- contributor documentation for lesson creation
+- documented vocabulary export format
+- workflow documentation for lesson publishing
 
-### Phase 5: Add Learning Loops and Progress Depth
+### Phase 5: Add Richer Retention Loops and Learning Analytics
 
-Target outcome: make the app useful for repeat practice, not just one-time reading.
+Target outcome: make the app useful for repeated learning, not just one-time lesson completion.
 
 Workstreams:
 
 - track lesson history beyond simple completion
-- add saved vocabulary review or revisit queues
-- introduce spaced repetition or “practice again” recommendations
-- add listening-only, read-along, and vocabulary-first modes
-- consider learner goals such as daily practice streaks or lesson targets
+- track vocabulary exposure across stories
+- add saved review queues or “practice again” recommendations
+- introduce spaced repetition or revisit scheduling for story-derived vocabulary
+- add listening-only, read-along, and vocabulary-first practice modes
+- log simple learning signals locally, such as comprehension accuracy and delayed recall performance
 
 Suggested deliverables:
 
-- richer local learner progress model
-- vocabulary revision loop
-- repeat-engagement features for retention
+- richer learner progress model
+- story-to-review retention loop
+- basic learning analytics stored locally
+- repeat-engagement features for vocabulary retention
 
 ## Supporting Tracks
 
 ### Content Operations
 
 - define editorial standards for natural Kannada, beginner readability, and translation style
-- create pronunciation guidelines so transliteration stays consistent
-- establish a review pass for vocabulary usefulness and duplicate coverage
+- define how Devanagari support should be written and when it appears
+- document pronunciation consistency rules across lessons
 - decide how many new words each lesson should introduce
+- establish a review pass for vocabulary usefulness, duplicate coverage, and comprehension difficulty
+- maintain a simple corpus rationale so story selection stays intentional
 
 ### Quality and Testing
 
 - add tests for progress storage and lesson state transitions
 - validate that token timings are monotonic and fit inside segment duration
-- test lesson navigation for first segment, last segment, and replay flows
-- add a simple pre-release checklist for new stories
+- test lesson navigation for first segment, last segment, replay, and narration-backed flows
+- add a pre-release checklist for new lessons
+- validate glossary, pronunciation, and comprehension fields in lesson manifests
 
 ### Distribution and Readiness
 
-- define what an MVP release means: number of stories, narration coverage, and supported devices
-- add basic analytics only after the core learning loop is stable
-- prepare app metadata, branding, and documentation for public sharing
+- define what MVP means in terms of story count, narration coverage, and supported devices
+- keep analytics lightweight until the lesson loop is stable
+- align public-facing metadata and descriptions with the curated-content product direction
 
 ## Recommended Near-Term Priorities
 
-If we want the highest leverage next steps, the order should be:
+If we want the highest-leverage next steps, the order should be:
 
-1. stabilize the current lesson player and add content validation
-2. fully narrate the two existing stories
-3. define the story authoring standard and checklist
-4. expand the story library to a meaningful beginner set
-5. move content into a more scalable manifest-based format
+1. define the minimal external lesson schema and validation rules
+2. stabilize the current lesson player around that schema
+3. commit to a narration strategy, with Kannada TTS as the default baseline
+4. add Devanagari support, inline glossing, and comprehension to the lesson model
+5. fully narrate the two existing stories
+6. expand the story library using the schema rather than adding more TypeScript-authored lessons
 
 ## Success Metrics
 
-Early signals of progress:
+Output and product readiness metrics:
 
-- number of fully polished stories available
-- percentage of stories with real narration
-- lesson completion rate in internal testing
-- average number of vocabulary items reviewed per lesson
-- time required to add a new story from draft to published lesson
+- number of fully polished lessons available
+- percentage of lessons with narration
+- time required to add a new lesson from draft to published
+- completion rate in internal testing
+
+Learning effectiveness metrics:
+
+- vocabulary items seen across multiple stories
+- comprehension question accuracy by lesson
+- vocabulary recall after 48 hours for reviewed words
+- repeat usage of finished lessons and review queues
 
 ## Risks and Watchouts
 
-- content quality may become the bottleneck before engineering does
-- storing stories in code will slow down expansion if the library grows quickly
-- narration and token timing can drift unless validation is built in early
-- a larger library without clear level progression may feel scattered to learners
-- progress tracking will feel shallow unless replay and revision loops are added
+- narration quality and narration workflow can become the largest bottleneck if not decided early
+- storing stories in code will slow down content growth and make review harder
+- token timing, glossary entries, and pronunciation scaffolds can drift unless validation is built in early
+- a larger library without clear corpus criteria may feel random instead of curricular
+- a read-along experience without comprehension checks will undershoot the product’s stated goal
+- story vocabulary may become siloed unless it is designed to flow into the broader review system
 
 ## Suggested Definition of MVP
 
 The project can be considered MVP-ready when it has:
 
-- at least 10 beginner-friendly lessons
-- real narration for the full starter library
+- at least 10 beginner-friendly lessons built from a defined corpus strategy
+- narration for the full starter library
 - reliable lesson playback on mobile and desktop
-- validated story data with minimal manual QA friction
-- vocabulary review and progress tracking that encourage repeat use
+- Devanagari support for beginner pronunciation help
+- inline word help during reading
+- short comprehension checks in each lesson
+- validated lesson data with low manual QA friction
+- a basic path from story vocabulary into repeat review
 
 ## Assumptions
 
-- the product direction remains focused on curated lessons rather than live story generation
+- the product remains focused on curated lessons rather than live AI story generation
 - the first audience is beginner Kannada learners
-- audio-backed story lessons are a core part of the intended experience
-- the current app is still pre-release and can prioritize fundamentals over growth features
+- narration is a core part of the intended experience
+- AI TTS is an acceptable near-term narration baseline
+- this project is part of a broader Kannada learning ecosystem rather than a completely isolated app
