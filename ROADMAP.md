@@ -14,6 +14,7 @@ This roadmap is based on the current repository state and adjusted to reflect th
 - instrument the reading loop before optimizing it
 - evaluate interventions before trusting them in the live learner experience
 - prefer replayable, reviewable systems over clever but hard-to-debug automation
+- support multiple curated content types before adding dynamic agentic sources
 
 ## Current State
 
@@ -82,6 +83,8 @@ The first job of the product is to make the curated lesson loop strong. Agentic 
 
 When agentic features do arrive, they should complement the curated library rather than replace it. The most promising early use case is fetching recent news headlines or short source texts, simplifying them into learner-friendly Kannada, attaching vocabulary support, and turning them into optional practice material.
 
+This sequencing should be treated as deliberate product policy: curated multiple content types first, dynamic agentic sources later.
+
 ### Agent as control system, not content identity
 
 The agentic layer should decide what to fetch, how to simplify it, how to adapt it to the learner, and when to surface it. It should not erase the distinction between trusted curated lessons and dynamic practice material.
@@ -99,7 +102,10 @@ Workstreams:
 - verify responsive behavior and readability across mobile and desktop
 - add lightweight error handling for missing or malformed story content
 - define a minimal external story schema before adding many more lessons
-- include fields for Kannada text, English support text, token timing, optional audio, Devanagari pronunciation scaffold, vocabulary items, and comprehension questions
+- include fields for `contentType`, Kannada text, English support text, token timing, optional audio, Devanagari pronunciation scaffold, vocabulary items, and comprehension questions
+- define planned `contentType` values such as `story`, `poem`, `headline`, `news-brief`, and `dialogue`
+- separate source type from lesson mode in the schema documentation
+- distinguish between source metadata such as `curated`, `agentic`, `news`, or `literary` and lesson mode metadata such as `read-along`, `listening`, `gloss-first`, or `comprehension`
 - add validation for token timing monotonicity, segment duration consistency, and required lesson fields
 
 Suggested deliverables:
@@ -108,6 +114,10 @@ Suggested deliverables:
 - minimal JSON or manifest-based lesson schema
 - validation utilities for story data integrity
 - documented requirements for lesson fields and timing expectations
+
+Exit criteria:
+
+- the external schema is defined, `contentType` is first-class, and source-versus-mode semantics are documented clearly enough to author new lesson types without changing the model
 
 ### Phase 2: Add Narrated Lessons, Devanagari Support, Inline Glossing, and Comprehension
 
@@ -130,6 +140,10 @@ Suggested deliverables:
 - comprehension review at the end of each lesson
 - editorial checklist for lesson creation and QA
 
+Exit criteria:
+
+- at least two narrated lessons run end-to-end with glossary support and comprehension using the shared schema
+
 ### Phase 3: Expand the Library with a Defined Corpus Strategy
 
 Target outcome: grow into a small but coherent beginner curriculum instead of an arbitrary set of stories.
@@ -139,6 +153,8 @@ Workstreams:
 - define what “familiar stories” means for this product
 - document a corpus rationale based on vocabulary frequency, grammar usefulness, sentence length, and learner accessibility
 - prioritize sources such as Panchatantra, Aesop, and other widely-recognized stories with simple narrative structure
+- add short poems as an explicit curated content type, with separate authoring guidance for line structure, pacing, repetition, and recitation
+- note where poem playback differs from story playback, especially around segmenting, highlighting cadence, and comprehension expectations
 - add 8 to 12 additional lessons across beginner and early reader levels using the external schema
 - organize lessons by level, theme, or grammar focus
 - diversify vocabulary coverage across verbs, connectors, adjectives, and everyday nouns
@@ -146,9 +162,14 @@ Workstreams:
 Suggested deliverables:
 
 - starter library of 10 to 14 polished lessons
+- at least one poem-ready lesson pattern
 - written corpus selection criteria
 - visible progression path for beginners
 - content inventory with draft, review, narrated, and published states
+
+Exit criteria:
+
+- the library includes multiple curated content types, including stories and at least one poem pattern, all authored through the same schema
 
 ### Phase 4: Strengthen the Content Pipeline and Cross-App Vocabulary Flow
 
@@ -170,6 +191,10 @@ Suggested deliverables:
 - documented vocabulary export format
 - workflow documentation for lesson publishing
 
+Exit criteria:
+
+- new curated lessons can be authored, validated, and exported into the broader review system without editing application code
+
 ### Phase 5: Add Richer Retention Loops and Learning Analytics
 
 Target outcome: make the app useful for repeated learning, not just one-time lesson completion.
@@ -190,6 +215,10 @@ Suggested deliverables:
 - basic learning analytics stored locally
 - repeat-engagement features for vocabulary retention
 
+Exit criteria:
+
+- the app can measure repeat use and feed lesson vocabulary into a working review loop with learner-visible retention signals
+
 ### Phase 6A: Build a Deterministic Agentic Content Baseline
 
 Target outcome: add real-world reading content in a bounded, inspectable way before introducing open-ended model judgment.
@@ -208,6 +237,10 @@ Suggested deliverables:
 - bounded daily reading feed with inspectable transformation history
 - deterministic or manual-first simplification baseline
 - cached dynamic items represented in the lesson schema
+
+Exit criteria:
+
+- dynamic source items can be ingested, simplified through a deterministic baseline, and stored as inspectable learner-facing items without requiring LLM output
 
 ### Phase 6B: Add a Reflective LLM Layer for Simplification and Explanation
 
@@ -228,6 +261,10 @@ Suggested deliverables:
 - agent-generated practice lessons mapped into the existing schema
 - source-aware metadata and quality-review rules
 
+Exit criteria:
+
+- LLM-assisted simplification is bounded, reviewable, and measurably compared against the deterministic baseline before wider use
+
 ### Phase 6C: Add Adaptive Agentic Reading Recommendations
 
 Target outcome: close the loop so the system can select dynamic reading practice based on learner state rather than just publishing a generic feed.
@@ -245,6 +282,10 @@ Suggested deliverables:
 - first adaptive real-world reading loop
 - comparison reports between curated and agentic practice outcomes
 
+Exit criteria:
+
+- adaptive recommendations are logged, inspectable, and supported by outcome comparisons rather than intuition alone
+
 ## Supporting Tracks
 
 ### Content Operations
@@ -256,6 +297,12 @@ Suggested deliverables:
 - establish a review pass for vocabulary usefulness, duplicate coverage, and comprehension difficulty
 - maintain a simple corpus rationale so story selection stays intentional
 - define quality rules for agentic simplification so dynamic content stays readable and pedagogically useful
+
+### Content Type Registry
+
+- maintain a small registry of supported content types and planned content types
+- document, for each type, its source expectations, lesson mode expectations, player behavior differences, and authoring checklist requirements
+- start with `story` as the primary type, then add `poem` as the next curated type before later agentic types such as `headline` and `news-brief`
 
 ### Quality and Testing
 
