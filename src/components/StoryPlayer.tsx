@@ -47,6 +47,15 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
     return lookup;
   }, [story.inlineGlossary]);
 
+  const activeGlossaryEntry = useMemo(() => {
+    const activeToken = currentSegment.tokens[activeTokenIndex];
+    if (!activeToken) {
+      return null;
+    }
+
+    return glossaryLookup.get(normalizeGlossaryToken(activeToken.text)) ?? null;
+  }, [activeTokenIndex, currentSegment.tokens, glossaryLookup]);
+
   const handleAdvance = () => {
     if (currentSegmentIndex === story.segments.length - 1) {
       onComplete();
@@ -91,6 +100,14 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
       audioRef.current.load();
     }
   }, [currentSegment]);
+
+  useEffect(() => {
+    if (!activeGlossaryEntry) {
+      return;
+    }
+
+    setSelectedGlossaryEntry((current) => current ?? activeGlossaryEntry);
+  }, [activeGlossaryEntry]);
 
   useEffect(() => {
     if (!isPlaying) {
@@ -185,6 +202,23 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
             <Volume2 className="h-10 w-10 text-emerald-600" />
           </div>
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">{story.title}</h2>
+          <div className="mb-4 min-h-[4.5rem] max-w-2xl rounded-[1.5rem] border border-emerald-100 bg-white/90 px-5 py-4 shadow-[0_24px_40px_-32px_rgba(21,128,61,0.45)]">
+            {activeGlossaryEntry ? (
+              <div>
+                <p className="kannada-text text-2xl font-bold text-emerald-800">{activeGlossaryEntry.word}</p>
+                <p className="mt-1 text-lg font-semibold text-slate-700">{activeGlossaryEntry.meaning}</p>
+                {activeGlossaryEntry.pronunciationGuide?.devanagari && (
+                  <p className="mt-1 text-sm font-medium text-slate-500">
+                    {activeGlossaryEntry.pronunciationGuide.devanagari}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm font-medium text-slate-500">
+                As each word is highlighted, its quick meaning will appear here when glossary support is available.
+              </p>
+            )}
+          </div>
           <p className="max-w-2xl text-xl italic leading-9 text-slate-500 sm:text-3xl sm:leading-[3rem]">
             "{currentSegment.english}"
           </p>
