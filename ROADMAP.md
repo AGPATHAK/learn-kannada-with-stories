@@ -21,19 +21,19 @@ This roadmap is based on the current repository state and adjusted to reflect th
 The project already includes:
 
 - a story library UI with two beginner stories
-- a lesson player with timed token highlighting
-- a fallback preview mode when narration audio is missing
+- a lesson player with narrated segment-by-segment playback and timed token highlighting
+- inline glossary support during playback
 - an end-of-story vocabulary review screen
+- a comprehension screen after each lesson
 - local completion tracking in the browser
+- manifest-backed lesson content with shared validation
+- generated local narration for the two starter stories
 - a clean TypeScript and Vite codebase for curated lesson content
 
 The main gaps are:
 
-- no explicit narration strategy
-- story content still authored directly in TypeScript
-- no Devanagari pronunciation scaffold in the lesson data model
-- no comprehension questions in the lesson flow
-- no inline word help while reading
+- narration quality and pacing still need user testing and polish
+- glossary coverage is improved but still selective rather than exhaustive
 - no bridge from story vocabulary into the existing spaced-repetition ecosystem
 - no testing coverage for lesson playback, progress, or content integrity
 
@@ -119,6 +119,10 @@ Exit criteria:
 
 - the external schema is defined, `contentType` is first-class, and source-versus-mode semantics are documented clearly enough to author new lesson types without changing the model
 
+Status note:
+
+- effectively complete for the current two-story alpha
+
 ### Phase 2: Add Narrated Lessons, Devanagari Support, Inline Glossing, and Comprehension
 
 Target outcome: turn the prototype into a real beginner lesson experience rather than a timing demo.
@@ -143,6 +147,10 @@ Suggested deliverables:
 Exit criteria:
 
 - at least two narrated lessons run end-to-end with glossary support and comprehension using the shared schema
+
+Status note:
+
+- substantially reached for the current two-story alpha, with further polish now driven by hands-on testing rather than missing core features
 
 ### Phase 3: Expand the Library with a Defined Corpus Strategy
 
@@ -324,12 +332,11 @@ Exit criteria:
 
 If we want the highest-leverage next steps, the order should be:
 
-1. define the minimal external lesson schema and validation rules
-2. stabilize the current lesson player around that schema
-3. commit to a narration strategy, with Kannada TTS as the default baseline
-4. add Devanagari support, inline glossing, and comprehension to the lesson model
-5. fully narrate the two existing stories
-6. expand the story library using the schema rather than adding more TypeScript-authored lessons
+1. test the current two-story alpha and note playback, pacing, glossary, and comprehension friction
+2. polish narration pacing and segment ergonomics based on real usage
+3. tighten content authoring guidance and glossary coverage standards
+4. decide whether the next expansion is more stories or a second curated content type such as poems
+5. expand the story library using the schema rather than adding more TypeScript-authored lessons
 
 ## Success Metrics
 
