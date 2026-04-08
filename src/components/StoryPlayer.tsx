@@ -64,7 +64,7 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
 
     setCurrentSegmentIndex((index) => index + 1);
     setCurrentTimeMs(0);
-    setIsPlaying(true);
+    setIsPlaying(false);
   };
 
   const handleRetreat = () => {
