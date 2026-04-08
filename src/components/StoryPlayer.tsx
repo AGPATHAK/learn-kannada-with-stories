@@ -28,6 +28,7 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
 
   const currentSegment = story.segments[currentSegmentIndex];
   const currentDuration = getSegmentDuration(story, currentSegmentIndex);
+  const isSegmentComplete = currentTimeMs >= currentDuration && currentDuration > 0;
   const storyProgress = ((currentSegmentIndex + Math.min(currentTimeMs / Math.max(currentDuration, 1), 1)) / story.segments.length) * 100;
 
   const activeTokenIndex = useMemo(() => {
@@ -136,7 +137,6 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
         timerRef.current = null;
         setCurrentTimeMs(currentDuration);
         setIsPlaying(false);
-        handleAdvance();
         return;
       }
 
@@ -152,6 +152,19 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
   }, [currentDuration, currentSegment.audioSrc, currentSegmentIndex, isPlaying, onComplete, story.segments.length]);
 
   const handlePlayPause = () => {
+    if (!isPlaying && isSegmentComplete) {
+      if (currentSegmentIndex === story.segments.length - 1) {
+        onComplete();
+        return;
+      }
+
+      setCurrentSegmentIndex((index) => index + 1);
+      setCurrentTimeMs(0);
+      setSelectedGlossaryEntry(null);
+      setIsPlaying(true);
+      return;
+    }
+
     setIsPlaying((value) => !value);
   };
 
@@ -163,7 +176,7 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
 
   const handleAudioEnded = () => {
     setIsPlaying(false);
-    handleAdvance();
+    setCurrentTimeMs(currentDuration);
   };
 
   const handleAudioCanPlay = () => {
@@ -321,7 +334,17 @@ export default function StoryPlayer({ story, onExit, onComplete }: StoryPlayerPr
               <p className="font-semibold text-slate-700">
                 Segment {currentSegmentIndex + 1} of {story.segments.length}
               </p>
-              <p>{audioReady ? 'Narration loaded' : currentSegment.audioSrc ? 'Loading narration...' : 'Timed reading preview'}</p>
+              <p>
+                {isSegmentComplete
+                  ? currentSegmentIndex === story.segments.length - 1
+                    ? 'Segment complete. Press play to finish the lesson.'
+                    : 'Segment complete. Press play for the next segment.'
+                  : audioReady
+                    ? 'Narration loaded'
+                    : currentSegment.audioSrc
+                      ? 'Loading narration...'
+                      : 'Timed reading preview'}
+              </p>
             </div>
           </div>
         </div>
